@@ -1,3 +1,4 @@
+// server.ts
 /* eslint-disable @typescript-eslint/no-unused-vars -- Remove when used */
 import 'dotenv/config';
 import express from 'express';
@@ -47,21 +48,53 @@ app.get('/api/alpaca/account', async (req, res) => {
   }
 });
 
-app.get('/api/hello', (req, res) => {
-  res.json({ message: 'Hello, World!' });
+// Trading strategy function
+const runTradingStrategy = async () => {
+  try {
+    // Buy Bitcoin (BTC)
+    const symbol = 'BTCUSD';
+    const quantityToBuy = 0.00056; // Adjust the quantity as needed
+
+    console.log('Placing buy order...');
+    const buyOrder = await alpaca.createOrder({
+      symbol,
+      qty: quantityToBuy,
+      side: 'buy',
+      type: 'market',
+      time_in_force: 'gtc',
+    });
+
+    console.log('Buy order placed:', buyOrder);
+
+    // Wait for 30 seconds
+    console.log('Waiting for 30 seconds...');
+    await new Promise((resolve) => setTimeout(resolve, 30000));
+
+    // Sell Bitcoin (BTC) after 30 seconds
+    console.log('Placing sell order...');
+    const sellOrder = await alpaca.createOrder({
+      symbol,
+      qty: quantityToBuy,
+      side: 'sell',
+      type: 'market',
+      time_in_force: 'gtc',
+    });
+
+    console.log('Sell order placed:', sellOrder);
+
+    console.log('Trading strategy completed.');
+  } catch (error) {
+    console.error('Error executing trading strategy:', error);
+  }
+};
+
+// Endpoint to trigger the trading strategy
+app.get('/api/alpaca/run-trading-strategy', async (req, res) => {
+  await runTradingStrategy(); // Wait for the trading strategy to complete
+  res.json({ message: 'Trading strategy completed' });
 });
 
-/**
- * Serves React's index.html if no api route matches.
- *
- * Implementation note:
- * When the final project is deployed, this Express server becomes responsible
- * for serving the React files. (In development, the Vite server does this.)
- * When navigating in the client, if the user refreshes the page, the browser will send
- * the URL to this Express server instead of to React Router.
- * Catching everything that doesn't match a route and serving index.html allows
- * React Router to manage the routing.
- */
+// Endpoint to serve React's index.html if no API route matches
 app.get('*', (req, res) => res.sendFile(`${reactStaticDir}/index.html`));
 
 app.use(errorMiddleware);
