@@ -94,11 +94,23 @@ app.get('/api/alpaca/run-trading-strategy', async (req, res) => {
   res.json({ message: 'Trading strategy completed' });
 });
 
-// Endpoint to serve React's index.html if no API route matches
+/**
+ * A catch-all route to serve the React application's index.html.
+ * @param {Object} req - The HTTP request object.
+ * @param {Object} res - The HTTP response object.
+ */
 app.get('*', (req, res) => res.sendFile(`${reactStaticDir}/index.html`));
 
+/**
+ * Error handling middleware.
+ * @param {Error} err - The error object.
+ * @param {Object} req - The HTTP request object.
+ * @param {Object} res - The HTTP response object.
+ * @param {function} next - The next middleware function.
+ */
 app.use(errorMiddleware);
 
+// Start the server
 app.listen(process.env.PORT, () => {
   process.stdout.write(`\n\napp listening on port ${process.env.PORT}\n\n`);
 });
