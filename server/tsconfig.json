@@ -18,5 +18,5 @@
     "resolveJsonModule": true,
     "noEmit": true
   },
-  "include": ["."]
+  "include": [".", "../untyped/server.ts", "../untyped/server.js"]
 }
