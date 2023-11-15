@@ -6,7 +6,7 @@ import {
   ClientError,
   errorMiddleware,
   defaultMiddleware,
-} from './lib/index.js';
+} from '../server/lib/index.js';
 
 const connectionString =
   process.env.DATABASE_URL ||

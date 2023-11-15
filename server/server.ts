@@ -2,7 +2,10 @@
 import 'dotenv/config';
 import express from 'express';
 import pg from 'pg';
-import { ClientError, errorMiddleware } from './lib/index.js';
+import { ClientError, errorMiddleware } from '../server/lib/index.js';
+
+// Import Alpaca module
+import Alpaca from '@alpacahq/alpaca-trade-api';
 
 const connectionString =
   process.env.DATABASE_URL ||
@@ -24,6 +27,25 @@ app.use(express.static(reactStaticDir));
 // Static directory for file uploads server/public/
 app.use(express.static(uploadsStaticDir));
 app.use(express.json());
+
+// Alpaca API key and secret
+const alpaca = new Alpaca({
+  keyId: 'PKQ2BQ88YUJUY1720V1D',
+  secretKey: 'edFVbuQiuDjdu2sCoIL1S4dAUDSips18cyXSpSLt',
+  paper: true, // Set to 'false' for live trading
+  usePolygon: false, // Set to 'true' to use Polygon data
+});
+
+// Endpoint to fetch Alpaca account information
+app.get('/api/alpaca/account', async (req, res) => {
+  try {
+    const account = await alpaca.getAccount();
+    res.json(account);
+  } catch (error) {
+    console.error('Error fetching Alpaca account information:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 app.get('/api/hello', (req, res) => {
   res.json({ message: 'Hello, World!' });
