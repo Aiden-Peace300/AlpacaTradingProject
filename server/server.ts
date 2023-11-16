@@ -49,7 +49,7 @@ app.get('/api/alpaca/account', async (req, res) => {
 });
 
 // Trading strategy function
-const runTradingStrategy = async () => {
+const runTradingStrategy = async (): Promise<void> => {
   try {
     // Buy Bitcoin (BTC)
     const symbol = 'BTCUSD';
@@ -93,6 +93,51 @@ app.get('/api/alpaca/run-trading-strategy', async (req, res) => {
   await runTradingStrategy(); // Wait for the trading strategy to complete
   res.json({ message: 'Trading strategy completed' });
 });
+
+// Endpoint to fetch BuyTable data
+app.get('/api/buy-trades', async (req, res) => {
+  try {
+    const buyTradesData = await fetchBuyTradesFromDatabase();
+    res.json(buyTradesData);
+  } catch (error) {
+    console.error('Error fetching BuyTable data:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// function to fetch data for BuyTrades from the database
+const fetchBuyTradesFromDatabase = async (): Promise<any[]> => {
+  try {
+    const buyTradesQuery = 'SELECT * FROM "BuyTrades"';
+    const buyTradesResult = await db.query(buyTradesQuery);
+    return buyTradesResult.rows;
+  } catch (error) {
+    throw new Error(`Error fetching BuyTable data from the database: ${error}`);
+  }
+};
+
+app.get('/api/sell-trades', async (req, res) => {
+  try {
+    const sellTradesData = await fetchSellTradesFromDatabase();
+    res.json(sellTradesData);
+  } catch (error) {
+    console.error('Error fetching SellTable data:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// function to fetch data for SellTrades from the database
+const fetchSellTradesFromDatabase = async (): Promise<any[]> => {
+  try {
+    const sellTradesQuery = 'SELECT * FROM "SellTrades"';
+    const sellTradesResult = await db.query(sellTradesQuery);
+    return sellTradesResult.rows;
+  } catch (error) {
+    throw new Error(
+      `Error fetching SellTable data from the database: ${error}`
+    );
+  }
+};
 
 /**
  * A catch-all route to serve the React application's index.html.

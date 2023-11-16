@@ -1,10 +1,11 @@
-// App.tsx
 import React, { useState, useEffect } from 'react';
 
 const App: React.FC = () => {
   const [accountInfo, setAccountInfo] = useState<any>(null);
   const [strategyInitiating, setStrategyInitiating] = useState(false);
   const [strategyCompleted, setStrategyCompleted] = useState(false);
+  const [buyTrades, setBuyTrades] = useState<any[]>([]);
+  const [sellTrades, setSellTrades] = useState<any[]>([]);
 
   const fetchAccountInfo = async () => {
     try {
@@ -17,11 +18,37 @@ const App: React.FC = () => {
     }
   };
 
+  const fetchBuyTrades = async () => {
+    try {
+      const response = await fetch('/api/buy-trades');
+      const buyTradesData = await response.json();
+      setBuyTrades(buyTradesData);
+    } catch (error) {
+      console.error('Error fetching BuyTable data:', error);
+    }
+  };
+
+  const fetchSellTrades = async () => {
+    try {
+      const response = await fetch('/api/sell-trades');
+      const sellTradesData = await response.json();
+      setSellTrades(sellTradesData);
+    } catch (error) {
+      console.error('Error fetching SellTable data:', error);
+    }
+  };
+
   useEffect(() => {
     fetchAccountInfo(); // Initial fetch
+    fetchBuyTrades(); // Initial fetch
+    fetchSellTrades(); // Initial fetch
 
     // Fetch account info every 10 seconds (adjust the interval as needed)
-    const intervalId = setInterval(fetchAccountInfo, 10000);
+    const intervalId = setInterval(() => {
+      fetchAccountInfo();
+      fetchBuyTrades();
+      fetchSellTrades();
+    }, 10000);
 
     // Cleanup the interval on component unmount
     return () => clearInterval(intervalId);
@@ -43,6 +70,7 @@ const App: React.FC = () => {
 
   return (
     <div>
+      {/* Display BuyTable data */}
       <h1>Alpaca Account Information</h1>
       {accountInfo ? (
         <div>
@@ -67,6 +95,26 @@ const App: React.FC = () => {
         <p>Loading account information...</p>
       )}
       <h1>Trades for DATE HERE</h1>
+      <h2>Buy Trades</h2>
+      <ul>
+        {buyTrades.map((buyTrade) => (
+          <li key={buyTrade.id}>
+            Symbol: {buyTrade.symbol}, Type: {buyTrade.type}, Quantity:{' '}
+            {buyTrade.qty}
+          </li>
+        ))}
+      </ul>
+
+      {/* Display SellTable data */}
+      <h2>Sell Trades</h2>
+      <ul>
+        {sellTrades.map((sellTrade) => (
+          <li key={sellTrade.id}>
+            Symbol: {sellTrade.symbol}, Type: {sellTrade.type}, Quantity:{' '}
+            {sellTrade.qty}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };
